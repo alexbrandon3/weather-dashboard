@@ -66,10 +66,6 @@ var day5T = document.createElement('p');
 var day5W = document.createElement('p');
 
 var historySection = document.querySelector('.bottom-half');
-var cityBtn = document.createElement('button');
-cityBtn.setAttribute('class', 'cityBtn');
-
-
 
 // To capitalize the user's input when placed into div header
 function capitalize(string) {
@@ -105,17 +101,15 @@ function getUV(url) {
         return response.json();
       })
       .then(function (data) {
-        console.log(data);
-        console.log(data.daily[0].uvi);
         day0pre.textContent = "UV Index: ";
         day0UV.textContent = data.daily[0].uvi;
         day0IndexBox.setAttribute('class', 'uv');
         currentContainer.append(day0IndexBox);
         day0IndexBox.append(day0pre);
-        if(data.daily[0].uvi <= 4.5){
+        if(data.daily[0].uvi <= 3){
             day0UV.setAttribute('class', 'low');
         }
-        else if(data.daily[0].uvi > 6.65){
+        else if(data.daily[0].uvi > 7){
             day0UV.setAttribute('class', 'high');
         }
         else{
@@ -130,8 +124,6 @@ function getWeather(url) {
       return response.json();
     })
     .then(function (info) {
-      console.log("five day forecast", info);
-      console.log("* Date *", info.list[0].dt_txt);
       temperatures.push(
         info.list[0].main.temp,
         info.list[6].main.temp,
@@ -213,39 +205,60 @@ function getWeather(url) {
     });
 }
 
+function addCity(){
+    historySection.innerHTML = "";
+    var cities = JSON.parse(localStorage.getItem("cities")) || [];
+    for(var i = 0; i < cities.length; i++){
+        var cityBtn = document.createElement('button');
+        cityBtn.setAttribute('class', 'cityBtn');
+        cityBtn.setAttribute('onclick', "search(event)")
+        cityBtn.textContent = cities[i];
+        historySection.append(cityBtn);
+    }
+}
 
+addCity();
 
 searchBtn.addEventListener("click", function () {
-  var input = document.querySelector(".input").value;
-  city = input;
-  url1 = `${rootURL}/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`;
-  getCoordinates(url1)
-  .then(function () {
+    var input = document.querySelector(".input").value;
+    document.querySelector('.input').value='';
+    city = input;
+    url1 = `${rootURL}/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`;
+    getCoordinates(url1)
+    .then(function () {
     url2 = `${rootURL}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`;
     getUV(url2);
-  });
-  url3 = `${rootURL}/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
-  getWeather(url3);
-  city = capitalize(city);
-  currentDate.textContent = city + " " + todayDate;
-  cityBtn.textContent = city;
-  historySection.append(cityBtn);
-  localStorage.setItem("city", JSON.stringify(city));
+    });
+    url3 = `${rootURL}/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
+    getWeather(url3);
+    city = capitalize(city);
+    var cities = JSON.parse(localStorage.getItem("cities")) || [];
+    if(cities.includes(city)){
+        return;
+    }
+    else{
+        cities.push(city);
+        currentDate.textContent = city + " " + todayDate;
+        localStorage.setItem("cities", JSON.stringify(cities));
+        addCity();
+    };
+    
 });
 
-cityBtn.addEventListener('click', function(){
-  var city = JSON.parse(localStorage.getItem("city"));
-  url1 = `${rootURL}/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`;
-  getCoordinates(url1)
-  .then(function () {
-    url2 = `${rootURL}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`;
-    getUV(url2);
-  });
-  url3 = `${rootURL}/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
-  getWeather(url3);
-  city = capitalize(city);
-  currentDate.textContent = city + " " + todayDate;
-  cityBtn.textContent = city;
-  historySection.append(cityBtn);
-  localStorage.setItem("city", JSON.stringify(city));
-});
+function search(event){
+    var city = event.target.innerHTML;
+    console.log(event);
+    url1 = `${rootURL}/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`;
+    getCoordinates(url1)
+    .then(function () {
+      url2 = `${rootURL}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`;
+      getUV(url2);
+    });
+    url3 = `${rootURL}/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`;
+    getWeather(url3);
+    city = capitalize(city);
+    currentDate.textContent = city + " " + todayDate;
+    var cities = JSON.parse(localStorage.getItem("cities")) || [];
+    localStorage.setItem("cities", JSON.stringify(cities));
+    addCity();
+  };
