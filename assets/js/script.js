@@ -79,10 +79,6 @@ var lon;
 var url1;
 var url2;
 var uvIndex;
-var temperatures = [];
-var icons = [];
-var wind = [];
-var humidity = [];
 var searchBtn = document.querySelector(".searchBtn");
 
 function getCoordinates(url) {
@@ -124,13 +120,17 @@ function getWeather(url) {
       return response.json();
     })
     .then(function (info) {
-      temperatures.push(
-        info.list[0].main.temp,
-        info.list[6].main.temp,
-        info.list[14].main.temp,
-        info.list[22].main.temp,
-        info.list[30].main.temp,
-        info.list[38].main.temp
+        var temperatures = [];
+        var icons = [];
+        var wind = [];
+        var humidity = [];
+        temperatures.push(
+            info.list[0].main.temp,
+            info.list[6].main.temp,
+            info.list[14].main.temp,
+            info.list[22].main.temp,
+            info.list[30].main.temp,
+            info.list[38].main.temp
         );
       icons.push(
         info.list[6].weather[0].icon,
@@ -262,3 +262,7 @@ function search(event){
     localStorage.setItem("cities", JSON.stringify(cities));
     addCity();
   };
+
+function pullInfo(){
+    
+}
