@@ -247,7 +247,6 @@ searchBtn.addEventListener("click", function () {
 
 function search(event){
     var city = event.target.innerHTML;
-    console.log(event);
     url1 = `${rootURL}/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`;
     getCoordinates(url1)
     .then(function () {
